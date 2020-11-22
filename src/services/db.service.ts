@@ -1,10 +1,8 @@
+import { DefaultService } from './service.default';
 import { User } from './../models/user.model';
 import { Sequelize } from 'sequelize-typescript';
-import { Logger } from './../utils/logger';
 import * as mysql from "mysql2/promise"
-export class DBService {
-
-  private readonly _logger = new Logger(this);
+export class DBService extends DefaultService {
 
 	private readonly _sequelize = new Sequelize({
 		database: process.env.DB_NAME,
@@ -23,7 +21,7 @@ export class DBService {
    * Create a databse if it not exists
    * Throw errors that should be catch when calling this method
    */
-  public async init(removeOld = false) {
+  public async init() {
     
     (await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -31,7 +29,7 @@ export class DBService {
       user: process.env.DB_USER
     })).query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME}\`;`);
 
-    await this._sequelize.sync({ force: removeOld });
+    await this._sequelize.sync({ force: process.env.FORCE_RECREATE_DB === "true" });
 
     this._logger.log("Connected to Database");
   }

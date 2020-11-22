@@ -1,3 +1,5 @@
+import { AuthService } from './services/auth.service';
+import { DefaultService } from './services/service.default';
 import { Logger } from './utils/logger';
 import { DBService } from './services/db.service';
 import { BotService } from './services/bot.service';
@@ -16,6 +18,12 @@ class App {
     RankComponent
   ] 
 
+  private readonly _services: (typeof DefaultService)[] = [
+    AuthService,
+    BotService,
+    DBService
+  ]
+
   public async init() {
     await this._initServices();
     await this._initComponent();
@@ -23,8 +31,8 @@ class App {
 
   private async _initServices() {
     try {
-      await this._botService.init();
-      await this._dbService.init(process.env.FORCE_RECREATE_DB === "true");
+      for (const Service of this._services)
+        await new Service().init();
     } catch (e) {
       this._logger.error("Services Initialization Error :", e);
     }

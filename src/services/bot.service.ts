@@ -1,12 +1,10 @@
-import { DBService } from './db.service';
-import { Logger } from './../utils/logger';
+import { DefaultService } from './service.default';
 import * as Discord from "discord.js";
 import { generate as uuid } from "short-uuid";
 
-export class BotService {
+export class BotService extends DefaultService {
 
   private _bot: Discord.Client = new Discord.Client();
-  private _logger: Logger = new Logger(this);
 
   private _listeners: ListenerData<keyof Discord.ClientEvents> = {};
   
