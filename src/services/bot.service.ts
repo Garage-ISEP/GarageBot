@@ -16,6 +16,7 @@ export class BotService {
    */
   public async init() {
     await this._bot.login(process.env.BOT_TOKEN);
+    this._logger.log("Bot logged in !");
   }
 
   /**
