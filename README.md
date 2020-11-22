@@ -14,3 +14,6 @@ in this class will be then linked to this class
 ## Instructions for deployment
 * Download docker desktop
 * RUN 'docker-compose up -d --build' in your terminal
+
+## Instruction for use
+* You need to go on the root URL (in dev mode : localhost:3000) to add the bot to your discord server
