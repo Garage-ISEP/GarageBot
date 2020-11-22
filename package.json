@@ -2,9 +2,11 @@
   "name": "garagebot",
   "version": "0.0.1",
   "description": "",
-  "main": "bin/index.js",
+  "main": "bin/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node ./bin/app.js",
+    "dev": "tsc-watch --onSuccess 'npm start' --onFailure 'echo Error during compilation'"
   },
   "repository": {
     "type": "git",
@@ -22,13 +24,19 @@
   },
   "homepage": "https://github.com/Garage-ISEP/GarageBot#readme",
   "dependencies": {
+    "@types/bluebird": "^3.5.33",
+    "@types/validator": "^13.1.0",
+    "@types/ws": "^7.4.0",
     "discord.js": "^12.5.0",
     "dotenv": "^8.2.0",
-    "sequelize": "^6.3.5",
+    "mysql2": "^2.2.5",
+    "reflect-metadata": "^0.1.13",
+    "sequelize": "^5.22.3",
     "sequelize-typescript": "^1.1.0",
     "short-uuid": "^4.1.0"
   },
   "devDependencies": {
-    "@types/dotenv": "^8.2.0"
+    "tsc-watch": "^4.2.9",
+    "typescript": "^4.1.2"
   }
 }
