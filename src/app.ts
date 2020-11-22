@@ -4,11 +4,17 @@ import { BotService } from './services/bot.service';
 import { VoiceChannelComponent } from './components/voice-channel-component';
 import { RankComponent } from './components/rank-component';
 import * as dotenv from "dotenv";
+import { DefaultComponent } from './components/component.default';
 class App {
 
   private _botService = new BotService();
   private _dbService = new DBService();
   private _logger = new Logger(this);
+
+  private readonly _components: (typeof DefaultComponent)[] = [
+    VoiceChannelComponent,
+    RankComponent
+  ] 
 
   public async init() {
     await this._initServices();
@@ -26,8 +32,8 @@ class App {
 
   private async _initComponent() {
     try {
-      await new VoiceChannelComponent(this._dbService, this._botService).init();
-      await new RankComponent(this._dbService, this._botService).init();
+      for (const Component of this._components)
+        await new Component(this._dbService, this._botService).init();
     } catch (e) {
       this._logger.error("Components Initialization Error :", e);
     }
