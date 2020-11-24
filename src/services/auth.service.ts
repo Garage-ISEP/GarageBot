@@ -27,7 +27,7 @@ export class AuthService extends DefaultService {
 
   public async onResponse(req: express.Request, res: express.Response) {
     const query: AuthResponse = req.query as unknown as AuthResponse;
-    if (req.statusCode !== 200) {
+    if (req.statusCode >= 300) {
       this._logger.error("Error authenticating : ", query);
     }
     this._logger.log("New server for bot with perm", query.permissions, "with guild id", query.guild_id);

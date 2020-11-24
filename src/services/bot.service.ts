@@ -12,9 +12,15 @@ export class BotService extends DefaultService {
    * Initilize the bot connection
    * Throw errors that should be catch when calling this method
    */
-  public async init() {
+  public async init(): Promise<void> {
     await this._bot.login(process.env.BOT_TOKEN);
     this._logger.log("Bot logged in !");
+    return new Promise((resolve, error) => {
+      this._bot.on("ready", () => {
+        this._logger.log("Bot ready !");
+        resolve();
+      });
+    });
   }
 
   /**
