@@ -10,5 +10,5 @@ export class DefaultComponent {
     protected _botService: BotService
   ) { }
 
-  public async init(): Promise<void> { };
+  public async init(): Promise<DefaultComponent> { return this };
 }

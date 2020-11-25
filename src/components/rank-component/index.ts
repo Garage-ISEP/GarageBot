@@ -6,8 +6,9 @@ import { DBService } from './../../services/db.service';
  */
 export class RankComponent extends DefaultComponent {
   
-  public async init() {
+  public async init(): Promise<RankComponent> {
     //Init le systeme de component
+    return this;
   }
 
 }

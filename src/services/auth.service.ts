@@ -6,7 +6,7 @@ export class AuthService extends DefaultService {
   private readonly _app = express();
   private readonly _router = express.Router();
 
-  public async init() {
+  public async init(): Promise<AuthService> {
     this._app.use(express.json());
     this._app.use(express.urlencoded({ extended: false }));
     this._app.use(this._router);
@@ -14,12 +14,12 @@ export class AuthService extends DefaultService {
     this._router.get("/bot", (req, res) => this.onResponse(req, res))
     this._router.all("*", (req, res) => res.redirect(encodeURI(process.env.BOT_LINK + process.env.ROOT_URL + "/bot")));
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this._app.listen(process.env.PORT ?? 3000, () => {
         this._logger.log("Listening on port", process.env.PORT ?? 3000);
         this._logger.log("Listening GET on /bot for auth response");
         this._logger.log("Listening ALL on * for redirect to bot uri");
-        resolve();
+        resolve(this);
       });
     });
     

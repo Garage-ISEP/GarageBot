@@ -7,18 +7,20 @@ export class BotService extends DefaultService {
   private _bot: Discord.Client = new Discord.Client();
 
   private _listeners: ListenerData<keyof Discord.ClientEvents> = {};
+
+  public id = Math.random();
   
   /**
    * Initilize the bot connection
    * Throw errors that should be catch when calling this method
    */
-  public async init(): Promise<void> {
-    await this._bot.login(process.env.BOT_TOKEN);
-    this._logger.log("Bot logged in !");
+  public async init(): Promise<DefaultService> {
+    this._bot.login(process.env.BOT_TOKEN);
     return new Promise((resolve, error) => {
-      this._bot.on("ready", () => {
-        this._logger.log("Bot ready !");
-        resolve();
+      this._bot.on("ready", async () => {
+        this._logger.log("Bot logged in and synced ! > "+this.id);
+        this._logger.log(this.getAllGuilds().length);
+        resolve(this);
       });
     });
   }
@@ -60,6 +62,7 @@ export class BotService extends DefaultService {
    * Get all the guilds that the server has
    */
   public getAllGuilds(): Discord.Guild[] {
+    this._logger.log(this._bot.guilds.cache.array().length);
     return this._bot.guilds.cache.array();
   }
 }

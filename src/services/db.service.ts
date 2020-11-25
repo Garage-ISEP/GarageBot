@@ -18,10 +18,10 @@ export class DBService extends DefaultService {
   
   /**
    * Initilize the Database connexion
-   * Create a databse if it not exists
+   * Create a database if it not exists
    * Throw errors that should be catch when calling this method
    */
-  public async init() {
+  public async init(): Promise<DBService> {
     
     (await mysql.createConnection({
       host: process.env.DB_HOST,
@@ -32,6 +32,7 @@ export class DBService extends DefaultService {
     await this._sequelize.sync({ force: process.env.FORCE_RECREATE_DB === "true" });
 
     this._logger.log("Connected to Database");
+    return this;
   }
 
 }
