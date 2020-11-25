@@ -8,8 +8,6 @@ export class BotService extends DefaultService {
 
   private _listeners: ListenerData<keyof Discord.ClientEvents> = {};
 
-  public id = Math.random();
-  
   /**
    * Initilize the bot connection
    * Throw errors that should be catch when calling this method
@@ -18,8 +16,7 @@ export class BotService extends DefaultService {
     this._bot.login(process.env.BOT_TOKEN);
     return new Promise((resolve, error) => {
       this._bot.on("ready", async () => {
-        this._logger.log("Bot logged in and synced ! > "+this.id);
-        this._logger.log(this.getAllGuilds().length);
+        this._logger.log("Bot logged in and synced !");
         resolve(this);
       });
     });
