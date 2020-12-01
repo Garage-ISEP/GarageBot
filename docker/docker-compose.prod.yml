@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  bot:
+    container_name: garage-bot
+    image: docker.pkg.github.com/garage-isep/garagebot/garage-bot:main
+    restart: always
+    expose:
+      - 80
+    environment:
+      - PORT=80
+      - NODE_ENV=production
+    depends_on:
+      - db
+    links:
+      - db
+    env_file:
+      bot.env
+    networks:
+      - "traefik"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.garage-bot-secure.rule=Host(`bot.garageisep.com`)"
+      - "traefik.http.routers.garage-bot-secure.entrypoints=websecure"
+      - "traefik.http.routers.garage-bot-secure.tls.certresolver=myhttpchallenge"
+      # https redirection
+      - "traefik.http.middlewares.redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.garage-bot.rule=Host(`bot.garageisep.com`)"
+      - "traefik.http.routers.garage-bot.entrypoints=web"
+      - "traefik.http.routers.garage-bot.middlewares=redirect"
+  db:
+    image: mysql
+    container_name: garage-bot-db
+    restart: always
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+    expose:
+      - 3306
+    volumes:
+      - mysqldata:/var/lib/mysql
+
+networks:
+  traefik:
+    external: true
+volumes:
+  mysqldata:
