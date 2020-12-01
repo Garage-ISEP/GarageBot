@@ -20,7 +20,8 @@ export class VoiceChannelComponent extends DefaultComponent {
 
   /**
    * Réagis aux messages avec un prefix défini
-   * Commande : !g cvc : @see _sendMessageCreateChannel
+   * Commande : !g cvc start: @see _enableVoiceChannel
+   * Commande : !g cvc stop : @see _disableVoiceChannel
    */  
   private _messageListener(message: Message) {
     if (!message.guild.member(message.author).hasPermission("ADMINISTRATOR"))
