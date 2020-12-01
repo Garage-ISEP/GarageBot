@@ -17,3 +17,11 @@ in this class will be then linked to this class
 
 ## Instruction for use
 * You need to go on the root URL (in dev mode : localhost:3000) to add the bot to your discord server
+
+## Instruction for the Voice Channel Feature
+* You have to be adminitrator of your guild to enable this feature
+* tap : "!g cvc start" to enable the feature
+* tap : "!g cvc stop" to disable the feature
+* Once the feature enabled, everyone can click on the + to create a temporary discord vocal channel
+* If the creator is already in a vocal channel he will be moved to the new one
+* If a vocal channel is empty it will be delete
