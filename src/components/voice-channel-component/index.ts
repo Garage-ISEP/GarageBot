@@ -82,7 +82,6 @@ export class VoiceChannelComponent extends DefaultComponent {
   private async _disableVoiceChannel(channel: TextChannel) {
     try {
       const voiceData = this._voicesData.find(el => el.guildId === channel.guild.id);
-      this._logger.log(voiceData);
       if (voiceData) {
         this._logger.log("Disabling voice feature in guild :", channel.guild.name);
         for (const channelData of voiceData.channels) {
@@ -131,6 +130,7 @@ export class VoiceChannelComponent extends DefaultComponent {
         const msgReactions = msgChannel.messages.resolve(voiceData.msgId).reactions.resolve(this.emoji);
 
         const creatorId = voiceData.channels.find(el => el.channelId == channel.id).creatorId;
+        voiceData.channels = voiceData.channels.filter(el => el.channelId !== channel.id);
         await msgReactions.users.remove(creatorId);
         await channel.delete();
       } catch (e) {
