@@ -10,8 +10,8 @@ export class VoiceHandlerComponent extends DefaultComponent {
 
   public async init(): Promise<VoiceHandlerComponent> {
     this._botService.addEventListener('message', message => this._messageListener(message));
-    this._botService.addEventListener("messageReactionAdd", (reaction, user) => this._reactionListener(reaction, user, "add"));
-    this._botService.addEventListener("messageReactionRemove", (reaction, user) => this._reactionListener(reaction, user, "remove"));
+    this._botService.addEventListener("messageReactionAdd", (reaction, user) => this._reactionListener(reaction, user));
+    // this._botService.addEventListener("messageReactionRemove", (reaction, user) => this._reactionListener(reaction, user, "remove"));
     this._botService.addEventListener("voiceStateUpdate", (prev, next) => this._voiceListener(prev));
     this._botService.addEventListener("channelDelete", (channel) => this._channelDeleteListener(channel as TextChannel))
     return this;
@@ -31,9 +31,9 @@ export class VoiceHandlerComponent extends DefaultComponent {
       this._disableVoiceChannel(message.channel as TextChannel)
   }
 
-  private _reactionListener(reaction: MessageReaction, user: PartialUser | User, action: "add"|"remove") {
+  private _reactionListener(reaction: MessageReaction, user: PartialUser | User) {
     try {
-      this._getGuildComponentFromId(reaction.message.guild.id)?.reactionListener(reaction, user, action);      
+      this._getGuildComponentFromCategory((reaction.message.channel as TextChannel).parentID)?.reactionListener(reaction, user);      
     } catch (e) {
       this._logger.error(e);
     }
@@ -46,7 +46,7 @@ export class VoiceHandlerComponent extends DefaultComponent {
    */
   private async _voiceListener(prev: VoiceState) {
     try {
-      await this._getGuildComponentFromId(prev.guild.id)?.onVoiceChannelUpdate(prev.channel);      
+      await this._getGuildComponentFromCategory(prev.channel.parentID)?.onVoiceChannelUpdate(prev.channel);      
     } catch (e) {
       this._logger.error(e);
     }
@@ -57,9 +57,9 @@ export class VoiceHandlerComponent extends DefaultComponent {
    * Supprime les données du channel IRL
    */
   private async _channelDeleteListener(channel: Channel) {
-    if (channel instanceof VoiceChannel) {
+    if (channel instanceof VoiceChannel && channel.parentID) {
       try {
-        await this._getGuildComponentFromId(channel.guild.id)?.removeDataChannelAndReaction(channel);
+        await this._getGuildComponentFromCategory(channel.parentID)?.removeDataChannelAndReaction(channel);
         this._logger.log(`Channel : ${channel.name} deleted removing creator reaction and data`);
       } catch (e) {
         this._logger.error(e);
@@ -73,7 +73,7 @@ export class VoiceHandlerComponent extends DefaultComponent {
    */
   private async _enableVoiceChannel(channel: TextChannel) {
     try {
-      if (!channel.isText() || !this._voicesData.find(el => el.guildId === channel.guild.id)) {
+      if (channel.isText() && !this._getGuildComponentFromCategory(channel.parentID)) {
         this._logger.log("Enabling voice feature in guild :", channel.guild.name);
         this._voicesData.push(await new VoiceComponent(this._botService).init(channel));
       }
@@ -91,7 +91,9 @@ export class VoiceHandlerComponent extends DefaultComponent {
    */
   private async _disableVoiceChannel(channel: TextChannel) {
     try {
-      const component = await this._getGuildComponentFromId(channel.guild.id).destroy();
+      if (!channel.parentID)
+        return;
+      const component = await this._getGuildComponentFromCategory(channel.parentID).destroy();
       this._voicesData.splice(this._voicesData.indexOf(component), 1);
     } catch (e) {
       this._logger.error(e);
@@ -100,5 +102,8 @@ export class VoiceHandlerComponent extends DefaultComponent {
 
   private _getGuildComponentFromId(id: string): VoiceComponent {
     return this._voicesData.find(el => el.guildId == id);
+  }
+  private _getGuildComponentFromCategory(id: string): VoiceComponent {
+    return this._voicesData.find(el => el.guildCategoryId == id);
   }
 }
