@@ -62,6 +62,10 @@ export class BotService extends DefaultService {
     this._logger.log(this._bot.guilds.cache.array().length);
     return this._bot.guilds.cache.array();
   }
+
+  public getAllChannels(): Discord.Channel[] {
+    return this._bot.channels.cache.array();
+  }
 }
 
 
