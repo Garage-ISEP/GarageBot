@@ -1,5 +1,5 @@
 import { Logger } from './../../utils/logger';
-import { CategoryChannel, MessageReaction, PartialUser, TextChannel, User, VoiceChannel, Guild } from 'discord.js';
+import { MessageReaction, PartialUser, TextChannel, User, VoiceChannel, Guild } from 'discord.js';
 import { BotService } from './../../services/bot.service';
 import { GuildVoiceModel } from './models/voice-channel.model';
 import discordConf from "../../conf/discord.conf";
@@ -7,13 +7,14 @@ import discordConf from "../../conf/discord.conf";
 export class VoiceComponent {
   private _guildData: GuildVoiceModel
   private readonly _logger: Logger = new Logger(this);
+
   constructor(
     private readonly _botService: BotService,
   ) { }
 
   public async init(channel: TextChannel): Promise<VoiceComponent> {
-    const msg = await channel.send("@everyone cliquez sur **"+discordConf.emoji+"** pour créer un nouveau channel vocal dans la catégorie **exercices** !");
-    const category = channel.parent || await channel.guild.channels.create("Exercices", { type: "category" });
+    const msg = await channel.send(`Réagissez avec un **+** pour créer un nouveau channel vocal dans la catégorie **${channel?.parent?.name}** !`);
+    const category = channel.parent || await channel.guild.channels.create("Salons automatiques", { type: "category" });
     await msg.react(discordConf.emoji);
     this._guildData = {
       guildId: msg.guild.id,
@@ -34,8 +35,12 @@ export class VoiceComponent {
    */
   public async destroy(): Promise<VoiceComponent> {
     for (const el of this._guildData.channels) {
-      await el.channel.delete();
-      // await this.removeDataChannelAndReaction(el.channel);
+      try {
+        if (el.channel.deletable)
+          await el.channel.delete();
+      } catch (e) {
+        this._logger.log("Channel already deleted");
+      }
     }
     if (this._guildData.createdCategory)
       await this._guildData.categoryChannel.delete();
@@ -48,17 +53,9 @@ export class VoiceComponent {
    * @param reaction reaction de l'utilisateur (message, emoji, ajout|suppression)
    * @param user utilisateur qui a réagis
    */
-  public async reactionListener(reaction: MessageReaction, user: User | PartialUser, action: "add"|"remove") {
-    if (user instanceof User && reaction.emoji.toString() === discordConf.emoji) {
-      if (action == "add")
-        await this._createVoiceChannel(user);
-      else {
-        const index = this._guildData.channels.findIndex(el => el.creatorId == user.id);
-        if (!index)
-          return;
-        await this._guildData.channels[index].channel.delete();
-        this._guildData.channels.splice(index, 1);
-      }
+  public async reactionListener(reaction: MessageReaction, user: User | PartialUser) {
+    if (user instanceof User && reaction.emoji.toString() === discordConf.emoji && !this._guildData.channels.find(el => el.creatorId == user.id)) {
+      await this._createVoiceChannel(user);
     }
   }
 
@@ -74,9 +71,10 @@ export class VoiceComponent {
     this._logger.log("Voice channel update on guild :", channel.guild.name);
     if (channel.members.size === 0) {
       try {
-        await channel.delete();
+        if (channel.deletable)
+          await channel.delete();
       } catch (e) {
-        this._logger.error(e);
+        this._logger.log("Channel already deleted");
       }
     }
   }
@@ -104,7 +102,7 @@ export class VoiceComponent {
       if (member.voice.channelID)
         await member.voice.setChannel(channel);
       else
-        setTimeout(() => channel?.members?.size == 0 && channel?.delete(),1000 * 60);
+        setTimeout(() => channel?.members?.size == 0 && channel?.delete(),1000 * 30);
       this._guildData.channels.push({ channel, creatorId: user.id });
     } catch (e) {
       this._logger.error(e);
@@ -114,6 +112,7 @@ export class VoiceComponent {
   get guildId(): string {
     return this._guildData.guildId;
   }
-  
-
+  get guildCategoryId(): string {
+    return this._guildData.categoryChannel.id;
+  }
 }
