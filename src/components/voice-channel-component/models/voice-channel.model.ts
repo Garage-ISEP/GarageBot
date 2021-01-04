@@ -1,10 +1,13 @@
-export interface VoiceModel {
-  msgId: string;
-  msgChannelId: string;
+import { CategoryChannel, Message, TextChannel, VoiceChannel } from "discord.js";
+
+export interface GuildVoiceModel {
+  msg: Message;
+  msgChannel: TextChannel;
   guildId: string;
-  categoryId: string;
+  createdCategory: boolean;
+  categoryChannel: CategoryChannel;
   channels: {
     creatorId: string;
-    channelId: string;
+    channel: VoiceChannel;
   }[];
 }

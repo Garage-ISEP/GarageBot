@@ -3,7 +3,7 @@ import { DefaultService } from './services/service.default';
 import { Logger } from './utils/logger';
 import { DBService } from './services/db.service';
 import { BotService } from './services/bot.service';
-import { VoiceChannelComponent } from './components/voice-channel-component';
+import { VoiceHandlerComponent } from './components/voice-channel-component';
 import { RankComponent } from './components/rank-component';
 import * as dotenv from "dotenv";
 import { DefaultComponent } from './components/component.default';
@@ -12,7 +12,7 @@ class App {
   private _logger = new Logger(this);
 
   private readonly _components = new Map<typeof DefaultComponent, DefaultComponent>([
-    [VoiceChannelComponent, undefined],
+    [VoiceHandlerComponent, undefined],
     [RankComponent, undefined]
   ]); 
 
