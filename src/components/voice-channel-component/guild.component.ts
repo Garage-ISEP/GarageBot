@@ -13,7 +13,7 @@ export class VoiceComponent {
   ) { }
 
   public async init(channel: TextChannel): Promise<VoiceComponent> {
-    const msg = await channel.send("@everyone cliquez sur **"+discordConf.emoji+"** pour créer un nouveau channel vocal dans la catégorie **exercices** !");
+    const msg = await channel.send(`Réagissez avec un **+** pour créer un nouveau channel vocal dans la catégorie **${channel?.parent?.name}** !`);
     const category = channel.parent || await channel.guild.channels.create("Salons automatiques", { type: "category" });
     await msg.react(discordConf.emoji);
     this._guildData = {
@@ -35,8 +35,12 @@ export class VoiceComponent {
    */
   public async destroy(): Promise<VoiceComponent> {
     for (const el of this._guildData.channels) {
-      await el.channel.delete();
-      // await this.removeDataChannelAndReaction(el.channel);
+      try {
+        if (el.channel.deletable)
+          await el.channel.delete();
+      } catch (e) {
+        this._logger.log("Channel already deleted");
+      }
     }
     if (this._guildData.createdCategory)
       await this._guildData.categoryChannel.delete();
@@ -67,9 +71,10 @@ export class VoiceComponent {
     this._logger.log("Voice channel update on guild :", channel.guild.name);
     if (channel.members.size === 0) {
       try {
-        await channel.delete();
+        if (channel.deletable)
+          await channel.delete();
       } catch (e) {
-        this._logger.error(e);
+        this._logger.log("Channel already deleted");
       }
     }
   }
@@ -97,7 +102,7 @@ export class VoiceComponent {
       if (member.voice.channelID)
         await member.voice.setChannel(channel);
       else
-        setTimeout(() => channel?.members?.size == 0 && channel?.delete(),1000 * 60);
+        setTimeout(() => channel?.members?.size == 0 && channel?.delete(),1000 * 30);
       this._guildData.channels.push({ channel, creatorId: user.id });
     } catch (e) {
       this._logger.error(e);

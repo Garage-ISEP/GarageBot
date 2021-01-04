@@ -46,7 +46,7 @@ export class VoiceHandlerComponent extends DefaultComponent {
    */
   private async _voiceListener(prev: VoiceState) {
     try {
-      await this._getGuildComponentFromCategory(prev.channel.parentID)?.onVoiceChannelUpdate(prev.channel);      
+      await this._getGuildComponentFromCategory(prev?.channel?.parentID)?.onVoiceChannelUpdate(prev.channel);      
     } catch (e) {
       this._logger.error(e);
     }
